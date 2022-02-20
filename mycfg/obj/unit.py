@@ -45,6 +45,8 @@ class Unit:
         for file in self.glob:
             src_file = const.DOTFILES_SAVE_DIR.joinpath(file.relative_to(self.home_path))
             if src_file.is_file():
+                if not file.exists():
+                    file.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(src_file, file)
             elif src_file.is_dir():
                 shutil.copytree(src_file, file,
@@ -60,7 +62,10 @@ class Unit:
             lib.exec_script(script)
         for file in self.glob:
             if file.is_file():
-                shutil.copy2(file, const.DOTFILES_SAVE_DIR.joinpath(file.relative_to(self.home_path)))
+                save_loc = const.DOTFILES_SAVE_DIR.joinpath(file.relative_to(self.home_path))
+                if not save_loc.exists():
+                    save_loc.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(file, save_loc)
             elif file.is_dir():
                 shutil.copytree(file, const.DOTFILES_SAVE_DIR.joinpath(file.relative_to(self.home_path)),
                                 dirs_exist_ok=True, ignore=shutil.ignore_patterns(*const.IGNORE_PATTERNS))

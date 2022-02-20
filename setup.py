@@ -14,7 +14,7 @@ def _file_readlines(path):
 
 setup(
     name="mycfg",
-    version="1.1.3",
+    version="1.1.5",
     author="pjones123",
     author_email="pjones-uk@outlook.com",
     description="A basic dotfiles manager",
