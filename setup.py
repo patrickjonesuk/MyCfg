@@ -14,14 +14,16 @@ def _file_readlines(path):
 
 setup(
     name="mycfg",
-    version="1.0.0",
+    version="1.1.3",
     author="pjones123",
+    author_email="pjones-uk@outlook.com",
     description="A basic dotfiles manager",
     long_description=_file_read(pathlib.Path("README.md")),
     long_description_content_type="text/markdown",
     url="https://github.com/pjones123/MyCfg",
     packages=find_packages(),
     install_requires=_file_readlines("requirements.txt"),
+    include_package_data=True,
     python_requires=">=3.6",
     keywords=["dotfiles"],
     entry_points={"console_scripts": ["mycfg = mycfg.__main__:main"]},

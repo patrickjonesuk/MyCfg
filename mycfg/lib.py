@@ -17,6 +17,10 @@ def ensure_list(item) -> list:
     return item
 
 
+def list_diff(a, b):
+    return [z for z in a if z not in b]
+
+
 def sh(cmd):
     subprocess.Popen(cmd.split()).wait()
 
@@ -26,7 +30,7 @@ def sh_in(_dir, cmd):
 
 
 def exec_script(script_name):
-    return sh_in(const.CUSTOM_SCRIPT_DIR, const.CUSTOM_SCRIPT_DIR.joinpath(pathlib.Path(script_name).resolve()))
+    return sh_in(const.CUSTOM_SCRIPT_DIR, str(const.CUSTOM_SCRIPT_DIR.joinpath(pathlib.Path(script_name)).resolve()))
 
 
 def read_file(path: pathlib.Path) -> str:
@@ -78,6 +82,11 @@ def ensure_config_files():
 
 def install_pkg(pkg):
     pm = meta.get("package_manager")
+    pms = meta.get("package_managers")
+    for x in pms:
+        if pm is not None:
+            break
+        pm = x
     if pm is None:
         pm = State.config.get(State.meta.get("environment")).get("default-package-manager", None)
     if pm is None:

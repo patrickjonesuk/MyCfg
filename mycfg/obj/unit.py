@@ -10,9 +10,14 @@ class Unit:
         self.name = name
         self.cfg = cfg
 
-        self.files = cfg.get("files", [])
+        self.files = lib.ensure_list(cfg.get("files", []))
+        self.exclude_files = lib.ensure_list(cfg.get("exclude-files", []))
+
         self.home_path = pathlib.Path.home()
-        self.glob = sum([[y for y in self.home_path.glob(z)] for z in self.files], [])
+        self.include_glob = sum([[y for y in self.home_path.glob(z)] for z in self.files], [])
+        self.exclude_glob = sum([[y for y in self.home_path.glob(z)] for z in self.exclude_files], [])
+        self.glob = lib.list_diff(self.include_glob, self.exclude_glob)
+
         self.install_commands = lib.ensure_list(cfg.get("install-command", []))
         self.install_scripts = lib.ensure_list(cfg.get("install-script", []))
 

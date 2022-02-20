@@ -19,6 +19,18 @@ def set_pm(args):
     print(f"{SUCCESS} Set{Fore.RESET} {args.pm}{Fore.GREEN} as the system package manager")
 
 
+def add_pm(args):
+    meta.append("package_managers", args.pm)
+    meta.save()
+    print(f"{SUCCESS} Added{Fore.RESET} {args.pm}{Fore.GREEN} as a backup package manager")
+
+
+def rm_pm(args):
+    meta.remove("package_managers", args.pm)
+    meta.save()
+    print(f"{SUCCESS} Removed{Fore.RESET} {args.pm}{Fore.GREEN} as a backup package manager")
+
+
 def set_env(args):
     meta.set("environment", args.env)
     meta.save()
@@ -96,6 +108,14 @@ set_pm_parser = sub_parser.add_parser("set-pm", help="Set the package manager to
 set_pm_parser.add_argument("pm", type=str)
 set_pm_parser.set_defaults(func=set_pm)
 
+add_pm_parser = sub_parser.add_parser("add-pm", help="Add a backup package manager")
+add_pm_parser.add_argument("pm", type=str)
+add_pm_parser.set_defaults(func=add_pm)
+
+rm_pm_parser = sub_parser.add_parser("rm-pm", help="Remove a backup package manager")
+rm_pm_parser.add_argument("pm", type=str)
+rm_pm_parser.set_defaults(func=rm_pm)
+
 set_env_parser = sub_parser.add_parser("set-env", help="Set the environment of the current system")
 set_env_parser.add_argument("env", type=str)
 set_env_parser.set_defaults(func=set_env)
@@ -106,6 +126,7 @@ cd_parser.set_defaults(func=cd)
 
 mk_script_parser = sub_parser.add_parser("mkscript", help="Create a custom script")
 mk_script_parser.add_argument("name")
+mk_script_parser.set_defaults(func=mkscript)
 
 
 def main():
