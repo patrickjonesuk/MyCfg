@@ -22,11 +22,11 @@ def list_diff(a, b):
 
 
 def sh(cmd):
-    subprocess.Popen(cmd.split()).wait()
+    return subprocess.call(cmd, shell=True)
 
 
 def sh_in(_dir, cmd):
-    subprocess.Popen(cmd.split(), cwd=_dir).wait()
+    return subprocess.call(cmd, cwd=_dir, shell=True)
 
 
 def exec_script(script_name):
@@ -47,8 +47,9 @@ def get_repo_url(string: str):
     if const.URL_REGEX.match(string):
         return string
     if any(map(string.startswith, ["gh:", "github:"])):
-        parts = string.split("/")[1:]
-        username, repo_name = parts[0], parts[1] if len(parts) > 1 else "dotfiles"
+        parts = string.split(":")[1].split("/")
+        username = parts[0]
+        repo_name = parts[1] if len(parts) > 1 else "dotfiles"
         return f"https://github.com/{username}/{repo_name}"
     else:
         return None

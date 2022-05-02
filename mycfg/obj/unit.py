@@ -11,6 +11,7 @@ class Unit:
         self.cfg = cfg
 
         self.files = lib.ensure_list(cfg.get("files", []))
+        self.preserve_symlinks = cfg.get("preserve-symlinks", "false") == "true"
         self.exclude_files = lib.ensure_list(cfg.get("exclude-files", []))
 
         self.home_path = pathlib.Path.home()
@@ -50,7 +51,7 @@ class Unit:
                 shutil.copy2(src_file, file)
             elif src_file.is_dir():
                 shutil.copytree(src_file, file,
-                                dirs_exist_ok=True, ignore=shutil.ignore_patterns(*const.IGNORE_PATTERNS))
+                                symlinks=self.preserve_symlinks, dirs_exist_ok=True, ignore=shutil.ignore_patterns(*const.IGNORE_PATTERNS))
             else:
                 print(f"[{src_file}] not found")
         for script in self.load_scripts_post:
@@ -68,7 +69,7 @@ class Unit:
                 shutil.copy2(file, save_loc)
             elif file.is_dir():
                 shutil.copytree(file, const.DOTFILES_SAVE_DIR.joinpath(file.relative_to(self.home_path)),
-                                dirs_exist_ok=True, ignore=shutil.ignore_patterns(*const.IGNORE_PATTERNS))
+                                symlinks=self.preserve_symlinks, dirs_exist_ok=True, ignore=shutil.ignore_patterns(*const.IGNORE_PATTERNS))
             else:
                 print(f"[{file}] not found")
         for script in self.save_scripts_post:

@@ -1,6 +1,7 @@
 import argparse
 import os
 import pathlib
+import shutil
 import stat
 
 from mycfg import lib, const, meta
@@ -66,9 +67,14 @@ def clone(args):
     url = lib.get_repo_url(args.repo)
     if url is None:
         return print(f"{FAILURE} Invalid URL{Fore.RESET}")
-    lib.sh(f"git clone {url} {const.MYCFG_CONFIG_DIR.resolve()}")
-    print(f"{SUCCESS} Cloned dotfiles repository!{Fore.RESET}")
+    shutil.rmtree(const.MYCFG_CONFIG_DIR)
+    if lib.sh(f"git clone {url} {const.MYCFG_CONFIG_DIR.resolve()}") == 0:
+        print(f"{SUCCESS} Cloned dotfiles repository!{Fore.RESET}")
 
+def backup(args):
+    dir = const.BACKUP_DIR.joinpath(args.name)
+    shutil.copytree(const.DOTFILES_SAVE_DIR, dir)
+    print(f"{SUCCESS} Saved backup to ${dir.relative_to(const.HOME)}{Fore.RESET}")
 
 def init(args):
     lib.write_file(const.MYCFG_CONFIG_DIR.joinpath(".gitignore"), "\n".join(const.DEFAULT_GIT_IGNORE))
@@ -100,6 +106,10 @@ save_parser.set_defaults(func=save)
 clone_parser = sub_parser.add_parser("clone", help="Clone a dotfiles repository. Overwrites existing repoistory.")
 clone_parser.add_argument("repo", type=str)
 clone_parser.set_defaults(func=clone)
+
+backup_parser = sub_parser.add_parser("backup", help="Back Up dotfiles directory")
+backup_parser.add_argument("name", type=str)
+backup_parser.set_defaults(func=backup)
 
 init_parser = sub_parser.add_parser("init", help="Initialise mycfg")
 init_parser.set_defaults(func=init)

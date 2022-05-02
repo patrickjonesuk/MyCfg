@@ -9,6 +9,7 @@ META_FILE = MYCFG_CONFIG_DIR.joinpath(pathlib.Path("meta.json"))
 CONFIG_FILE = MYCFG_CONFIG_DIR.joinpath(pathlib.Path("config.yml"))
 DOTFILES_SAVE_DIR = MYCFG_CONFIG_DIR.joinpath(pathlib.Path("dotfiles"))
 CUSTOM_SCRIPT_DIR = MYCFG_CONFIG_DIR.joinpath(pathlib.Path("scripts"))
+BACKUP_DIR = MYCFG_CONFIG_DIR.joinpath(pathlib.Path("backups"))
 URL_REGEX = re.compile(
     r"https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)")
 
@@ -23,7 +24,7 @@ DEFAULT_CONFIG_CONTENT = {
     "package-managers": {},
 }
 
-DEFAULT_GIT_IGNORE = ["meta.json"]
+DEFAULT_GIT_IGNORE = ["meta.json", "backups/"]
 
 PATH_VARIABLES = {
     "$HOME": HOME,
