@@ -3,6 +3,7 @@ import os
 import pathlib
 import shutil
 import stat
+import subprocess
 
 from mycfg import lib, const, meta
 from colorama import Fore
@@ -17,30 +18,32 @@ FAILURE = f"{Fore.RED}\u274c"
 def set_pm(args):
     meta.set("package_manager", args.pm)
     meta.save()
-    print(f"{SUCCESS} Set{Fore.RESET} {args.pm}{Fore.GREEN} as the system package manager")
+    print(f"{SUCCESS} Set{Fore.RESET} {args.pm}{Fore.GREEN} as the system package manager{Fore.RESET}")
 
 
 def add_pm(args):
     meta.append("package_managers", args.pm)
     meta.save()
-    print(f"{SUCCESS} Added{Fore.RESET} {args.pm}{Fore.GREEN} as a backup package manager")
+    print(f"{SUCCESS} Added{Fore.RESET} {args.pm}{Fore.GREEN} as a backup package manager{Fore.RESET}")
 
 
 def rm_pm(args):
     meta.remove("package_managers", args.pm)
     meta.save()
-    print(f"{SUCCESS} Removed{Fore.RESET} {args.pm}{Fore.GREEN} as a backup package manager")
+    print(f"{SUCCESS} Removed{Fore.RESET} {args.pm}{Fore.GREEN} as a backup package manager{Fore.RESET}")
 
 
 def set_env(args):
     meta.set("environment", args.env)
     meta.save()
-    print(f"{SUCCESS} Set{Fore.RESET} {args.env}{Fore.GREEN} as the system environment")
+    print(f"{SUCCESS} Set{Fore.RESET} {args.env}{Fore.GREEN} as the system environment{Fore.RESET}")
 
 
 def load(args):
     if meta.get("environment") not in State.config.get("environments", {}):
         return print(f"{FAILURE} Invalid environment set")
+    if args.confirm and input("Overwrite system files with saved configuration? [Y/n]").casefold() != "y":
+        return print(f"{FAILURE} Operation cancelled{Fore.RESET}")
     try:
         lib.load()
     except PackageManagerError as e:
@@ -59,6 +62,8 @@ def load(args):
 def save(args):
     if meta.get("environment") not in State.config.get("environments", {}):
         return print(f"{FAILURE} Invalid environment set")
+    if args.confirm and input("Overwrite system files with saved configuration? [Y/n]").casefold() != "y":
+        return print(f"{FAILURE} Operation cancelled{Fore.RESET}")
     lib.save()
     print(f"{SUCCESS} Saved configuration!{Fore.RESET}")
 
@@ -68,7 +73,7 @@ def clone(args):
     if url is None:
         return print(f"{FAILURE} Invalid URL{Fore.RESET}")
     shutil.rmtree(const.MYCFG_CONFIG_DIR)
-    if lib.sh(f"git clone {url} {const.MYCFG_CONFIG_DIR.resolve()}") == 0:
+    if subprocess.call(f"git clone {url} {const.MYCFG_CONFIG_DIR.resolve()}", shell=True) == 0:
         print(f"{SUCCESS} Cloned dotfiles repository!{Fore.RESET}")
 
 def backup(args):
@@ -84,7 +89,7 @@ def init(args):
 
 def cd(args):
     os.chdir(const.MYCFG_CONFIG_DIR)
-    lib.sh(os.environ["SHELL"])
+    subprocess.call(os.environ["SHELL"], shell=True)
 
 
 def mkscript(args):
@@ -98,9 +103,13 @@ parser = argparse.ArgumentParser()
 sub_parser = parser.add_subparsers()
 
 load_parser = sub_parser.add_parser("load", help="Load the saved configuration onto your system")
+load_parser.add_argument("--no-confirm", help="Don't require a confirmation through stdin before proceeding",
+        action="store_const", dest="confirm", const=False, default=True)
 load_parser.set_defaults(func=load)
 
 save_parser = sub_parser.add_parser("save", help="Save your system's configuration to the repo")
+save_parser.add_argument("--no-confirm", help="Don't require a confirmation through stdin before proceeding",
+        action="store_const", dest="confirm", const=False, default=True)
 save_parser.set_defaults(func=save)
 
 clone_parser = sub_parser.add_parser("clone", help="Clone a dotfiles repository. Overwrites existing repoistory.")

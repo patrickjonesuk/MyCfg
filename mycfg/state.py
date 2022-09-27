@@ -8,4 +8,10 @@ class State:
 
     meta = dict()
 
+    units = 0
+    packages = 0
+    repos = 0
+
+    errors = []
+
 

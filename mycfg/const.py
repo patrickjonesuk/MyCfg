@@ -30,3 +30,5 @@ PATH_VARIABLES = {
     "$HOME": HOME,
     "$MYCFG_CONFIG": MYCFG_CONFIG_DIR,
 }
+
+LF = "\n"

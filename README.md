@@ -9,16 +9,19 @@
 ### Setup:
 - Initialise a dotfiles repository: `mycfg init`
 or:
-Clone an existing dotfiles repository: `mycfg clone github:pjones123`
+Clone an existing dotfiles repository: `mycfg clone github:pjones123` or `mycfg clone https://github.com/pjones123/dotfiles`
 
 - Enter your dotfiles directory: `mycfg cd`
 - Customise your config by editing `config.yml`
 - Set the environment for your current system: `mycfg set-env <environment>`
 - Set the package manager for your current system: `mycfg set-pm <package-manager>`
+- Add additional (backup) package managers: `mycfg add-pm <package-manager>`
 
 ### Load the saved configuration onto your system: `mycfg load`
 ### Save your system's configuration to the dotfiles repository: `mycfg save`
 ### Create a new custom script in `~/.config/mycfg/scripts`: `mycfg mkscript <name>`
+
+## Any git repositories with at least one remote repository will be saved to the dotfiles repository as a git submodule, and cloned to any new system when loaded
 
 ## config file:
 Your MyCfg configuration exists at `~/.config/mycfg/config.yml`

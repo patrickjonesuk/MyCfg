@@ -1,5 +1,10 @@
 import pathlib
+from colorama import Fore
 import subprocess
+import typing
+from git.repo import Repo
+import git
+import os
 
 import json
 import yaml
@@ -9,6 +14,44 @@ from mycfg import meta, const
 from mycfg.error import PackageManagerError
 from mycfg.state import State
 from mycfg.parser import parse_environments
+
+class GitRepo(Repo):
+    def __init__(self, path: pathlib.Path, *args, **kwargs):
+        super().__init__(path, *args, **kwargs)
+        self.path: pathlib.Path = path
+        self.origin: git.Remote
+
+    def set_origin(self, origin: git.Remote):
+        self.origin = origin
+        return self
+
+    def get_origin(self) -> typing.Optional[git.Remote]:
+        try:
+            return self.remote("origin")
+        except ValueError:
+            if len(self.remotes) > 0:
+                return self.remotes[0]
+        return None
+
+def clear_screen():
+    subprocess.call("cls" if os.name == "nt" else "clear", shell=True)
+
+def print_status(**changes):
+    for key in changes:
+        setattr(State, key, getattr(State, key) + changes[key])
+    clear_screen()
+    print(f"""
+{Fore.GREEN}Progress:{Fore.RESET}
+
+Units: {State.units}
+Packages: {State.packages}
+Repositories: {State.repos}
+
+{Fore.RED}Errors ({len(State.errors)}):
+
+{(const.LF * 2).join(State.errors)}{Fore.RESET}
+        """)
+
 
 
 def ensure_list(item) -> list:
@@ -21,12 +64,19 @@ def list_diff(a, b):
     return [z for z in a if z not in b]
 
 
-def sh(cmd):
-    return subprocess.call(cmd, shell=True)
+def sh(cmd, **kwargs):
+    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, **kwargs)
+    ret = proc.wait()
+    stdout, stderr = proc.stdout, proc.stderr
+    err = stderr.read() if stderr else None
+
+    if err:
+        State.errors.append(err)
+    return ret
 
 
 def sh_in(_dir, cmd):
-    return subprocess.call(cmd, cwd=_dir, shell=True)
+    return sh(cmd, cwd=_dir)
 
 
 def exec_script(script_name):
@@ -105,6 +155,7 @@ def install_pkg(pkg):
     if pkg_name is None:
         raise PackageManagerError(missing_package=pkg)
     sh(f"{install_cmd} {pkg_name}")
+    print_status(packages=1)
 
 
 def load():
@@ -115,8 +166,10 @@ def load():
     units = []
     for group in env.groups:
         units.extend(group.get_all_units(visited_units))
+    print_status()
     for unit in units:
         unit.load()
+        print_status(units=1)
 
 
 def save():
@@ -127,5 +180,7 @@ def save():
     units = []
     for group in env.groups:
         units.extend(group.get_all_units(visited_units))
+    print_status()
     for unit in units:
         unit.save()
+        print_status(units=1)
