@@ -62,7 +62,7 @@ def load(args):
 def save(args):
     if meta.get("environment") not in State.config.get("environments", {}):
         return print(f"{FAILURE} Invalid environment set")
-    if args.confirm and input("Overwrite system files with saved configuration? [Y/n]").casefold() != "y":
+    if args.confirm and input("Overwrite saved repository with system configuration? [Y/n]").casefold() != "y":
         return print(f"{FAILURE} Operation cancelled{Fore.RESET}")
     lib.save()
     print(f"{SUCCESS} Saved configuration!{Fore.RESET}")
